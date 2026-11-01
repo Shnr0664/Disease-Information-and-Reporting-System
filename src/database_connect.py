@@ -1,14 +1,45 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-db_user = 'postgres'
-db_password = 'postgres'
-db_host = 'localhost'
-db_port = '5432'
-db_name = 'health_reporting_1'
+import os
 
-DATABASE_URL = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+
+load_dotenv()
+
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+
+required_variables = [
+    "DB_USER",
+    "DB_PASSWORD",
+    "DB_NAME"
+]
+
+missing = [
+    variable for variable in required_variables
+    if not os.getenv(variable)
+]
+
+if missing:
+    raise ValueError(
+        f"Missing environment variables: {missing}"
+    )
+
+DATABASE_URL = (
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
 engine = create_engine(DATABASE_URL)
+
+print("Database engine created successfully!")
+
+
 Session = sessionmaker(bind=engine)
 session = Session()
 
